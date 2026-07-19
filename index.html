@@ -880,6 +880,19 @@
         font-size: 16px;
         padding: 16px;
       }
+      .form-status {
+        margin-top: 14px;
+        min-height: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--ink-soft);
+      }
+      .form-status.success {
+        color: #15803d;
+      }
+      .form-status.error {
+        color: #b91c1c;
+      }
 
       /* ---------- FAQ ---------- */
       .faq {
@@ -1095,7 +1108,7 @@
           <div class="teacher-role">Giảng viên Toán - Lý</div>
           <ul>
             <li>Từng là sinh viên Trường Đại học Khoa học Tự nhiên, TP.HCM</li>
-            <li>2 năm ôn thi chuyên Tin và 4 năm làm gia sư Toán - Lý</li>
+            <li>3 năm ôn thi chuyên Tin và 5 năm làm gia sư Toán - Lý</li>
             <li>Hiện đang làm giảng viên bên Funix</li>
           </ul>
         </div>
@@ -1463,27 +1476,31 @@
           Điền thông tin bên dưới, anh chị sẽ liên hệ tư vấn trong vòng 24 giờ.
         </p>
       </div>
-      <form
-        class="form-card"
-        onsubmit="
-          event.preventDefault();
-          alert('Cảm ơn bạn đã đăng ký! Anh chị sẽ liên hệ sớm.');
-        "
-      >
+      <form class="form-card" id="signup-form">
         <div class="form-row">
           <div class="field">
             <label>Họ và tên</label
-            ><input type="text" placeholder="Nguyễn Văn A" required />
+            ><input
+              name="hoTen"
+              type="text"
+              placeholder="Nguyễn Văn A"
+              required
+            />
           </div>
           <div class="field">
-            <label>Số điện thoại</label
-            ><input type="tel" placeholder="09xxxxxxxx" required />
+            <label>Số điện thoại học sinh</label
+            ><input
+              name="soDienThoaiHocSinh"
+              type="tel"
+              placeholder="09xxxxxxxx"
+              required
+            />
           </div>
         </div>
         <div class="form-row">
           <div class="field">
             <label>Lớp</label>
-            <select required>
+            <select name="lop" required>
               <option value="">Chọn lớp</option>
               <option>Lớp 8</option>
               <option>Lớp 9</option>
@@ -1494,7 +1511,7 @@
           </div>
           <div class="field">
             <label>Môn học</label>
-            <select required>
+            <select name="monHoc" required>
               <option value="">Chọn môn</option>
               <option>Toán</option>
               <option>Vật Lý</option>
@@ -1504,20 +1521,48 @@
         </div>
         <div class="form-row">
           <div class="field full">
+            <label>Số điện thoại phụ huynh</label
+            ><input
+              name="soDienThoaiPhuHuynh"
+              type="tel"
+              placeholder="09xxxxxxxx"
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field full">
             <label>Facebook / Zalo</label
-            ><input type="text" placeholder="Link Facebook hoặc SĐT Zalo" />
+            ><input
+              name="facebookZalo"
+              type="text"
+              placeholder="Link Facebook hoặc SĐT Zalo"
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field full">
+            <label>Thời gian muốn học</label
+            ><input
+              name="thoiGianMuonHoc"
+              type="text"
+              placeholder="Ví dụ: chiều Thứ 2, 4, 6"
+            />
           </div>
         </div>
         <div class="form-row">
           <div class="field full">
             <label>Ghi chú</label
             ><textarea
+              name="ghiChu"
               rows="3"
               placeholder="Mục tiêu học tập, thời gian rảnh..."
             ></textarea>
           </div>
         </div>
-        <button type="submit" class="btn btn-yellow">Đăng ký ngay</button>
+        <button type="submit" class="btn btn-yellow" id="signup-button">
+          Đăng ký ngay
+        </button>
+        <div class="form-status" id="form-status" aria-live="polite"></div>
       </form>
     </section>
 
@@ -1601,6 +1646,44 @@
             answer.style.maxHeight = answer.scrollHeight + "px";
           }
         });
+      });
+
+      const signupForm = document.getElementById("signup-form");
+      const signupButton = document.getElementById("signup-button");
+      const formStatus = document.getElementById("form-status");
+
+      signupForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        formStatus.textContent = "";
+        formStatus.className = "form-status";
+        signupButton.disabled = true;
+        signupButton.textContent = "Đang gửi...";
+
+        try {
+          const response = await fetch("https://formspree.io/f/xbdnoqan", {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+            },
+            body: new FormData(signupForm),
+          });
+
+          if (response.ok) {
+            signupForm.reset();
+            formStatus.textContent = "Đăng ký đã được gửi thành công.";
+            formStatus.classList.add("success");
+          } else {
+            formStatus.textContent = "Không gửi được form. Vui lòng thử lại.";
+            formStatus.classList.add("error");
+          }
+        } catch (error) {
+          formStatus.textContent =
+            "Không gửi được form. Vui lòng kiểm tra kết nối mạng.";
+          formStatus.classList.add("error");
+        } finally {
+          signupButton.disabled = false;
+          signupButton.textContent = "Đăng ký ngay";
+        }
       });
     </script>
   </body>
